@@ -1003,7 +1003,7 @@ exports("getItem", InventoryAPI.getItem)
 ---get total items weight (internal function)
 ---@param identifier string user identifier
 ---@param charid number user charid
----@return integer
+---@return number
 function InventoryAPI.getUserTotalCountItems(identifier, charid)
 	local userTotalItemCount = 0
 	local userInventory = UsersInventories.default[identifier]
@@ -1013,8 +1013,11 @@ function InventoryAPI.getUserTotalCountItems(identifier, charid)
 			userInventory[item:getId()] = nil
 			DBService.DeleteItem(charid, item:getId())
 		else
-			local weight = item:getWeight() and (item:getWeight() * item:getCount()) or item:getCount()
-			userTotalItemCount = userTotalItemCount + weight
+			local metadata = item:getMetadata() or {}
+			local itemWeight = tonumber(metadata.weight or item:getWeight() or 0) or 0
+			local itemCount = tonumber(item:getCount() or 1) or 1
+
+			userTotalItemCount = userTotalItemCount + (itemWeight * itemCount)
 		end
 	end
 
